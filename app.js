@@ -2,15 +2,12 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 8080;
 const mongoose = require('mongoose');
-const passport = require('passport');
+const auth = require('./config/auth.js');
 const flash = require('connect-flash');
 
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-
 
 // middleware ==================================================================
 app.use(morgan('dev'));                           // log every request to the console
@@ -27,25 +24,11 @@ app.use(express.static(__dirname + '/static'));
 var configDB = require('./config/database.js');
 mongoose.connect(configDB.url)
 
-// sessions ====================================================================
-app.use(session({
-  secret: 'pocketlabswooooo',
-  saveUninitialized: false,                       // don't create session until something stored
-  resave: false,                                  // don't save session if unmodified
-  rolling: true,                                  // refresh maxAge on cookie, resetting expiration countdown
-  store: new MongoStore({
-    mongooseConnection: mongoose.connection,      // using same DB connection as app proper
-    touchAfter: 24 * 3600                         // (seconds) touches session once/day if requests but not modified
-  })
-}));
-
 // passport setup ==============================================================
-app.use(passport.initialize());
-app.use(passport.session());                      // persistent login sessions
-app.use(flash());                                 // use connect-flash for flash messages stored in session
+app.use(auth.initialize());
 
 // routes ======================================================================
-require('./globalRoutes.js')(app, passport)
+require('./globalRoutes.js')(app, auth)
 
 // launch ======================================================================
 app.listen(port, function() { console.log("Listening on port: " + port) });

@@ -1,3 +1,3 @@
-module.exports = function(app, passport) {
-  app.use('/', require('./auth/routes.js')(passport));
+module.exports = function(app, auth) {
+  app.use('/', require('./auth/routes.js')(auth));
 }
